@@ -41,10 +41,15 @@
                 "settings": {
                     "bundleName": "ui5.demo.app.i18n.i18n",
                     "supportedLocales": [
-                        "" , "fr"
+                        "",
+                        "fr"
                     ],
                     "fallbackLocale": ""
                 }
+            },
+            "product": {
+                "type": "sap.ui.model.json.JSONModel",
+                "uri": "model/Products.json"
             }
         }
     }

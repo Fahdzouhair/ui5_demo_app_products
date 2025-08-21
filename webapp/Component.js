@@ -1,5 +1,6 @@
-sap.ui.define(['sap/ui/core/UIComponent'],
-    (UIComponent,) => {
+sap.ui.define(['sap/ui/core/UIComponent',
+                'ui5/demo/app/model/models'],
+    (UIComponent,models) => {
         'use strict'
 
         return UIComponent.extend('ui5.demo.app.webapp.Component', {
@@ -11,7 +12,7 @@ sap.ui.define(['sap/ui/core/UIComponent'],
             init: function () {
                 //init parent 
                 UIComponent.prototype.init.apply(this, arguments)
-
+                this.setModel(models.createProductModel(),"input")
             }
         })
 

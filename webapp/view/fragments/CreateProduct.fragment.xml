@@ -24,9 +24,9 @@ xmlns:form="sap.ui.layout.form"
           <form:content>
             <core:Title text="{i18n>productDetails}" />
             <Label text="{i18n>productName}" />
-            <Input id="idProductName" maxLength="40" />
+            <Input id="idProductName" maxLength="40" value="{input>/Name}" />
             <Label text="{i18n>category}" />
-            <ComboBox id="idCategory">
+            <ComboBox id="idCategory" selectedKey="{input>/Category}">
               <items>
                 <core:Item key="" text="" />
                 <core:Item key="0" text="Food" />
@@ -35,7 +35,7 @@ xmlns:form="sap.ui.layout.form"
               </items>
             </ComboBox>
             <Label text="{i18n>price}" />
-            <Input id="idPrice" type="Number" />
+            <Input id="idPrice" type="Number" value="{input>/Price}" />
             <Input value="EUR" editable="false">
               <layoutData>
                 <l:GridData span="XL1 L2 M3 S12" />
@@ -43,9 +43,9 @@ xmlns:form="sap.ui.layout.form"
             </Input>
             <core:Title text="{i18n>dates}" />
             <Label text="{i18n>releaseDate}" />
-            <DatePicker id="idReleaseDate" placeholder="{i18n>releaseDate}" />
+            <DatePicker id="idReleaseDate"  value="{input>/ReleaseDate}"/>
             <Label text="{i18n>discontinuedDate}" />
-            <DatePicker id="idDiscontinuedDate" placeholder="{i18n>discontinuedDate}" />
+            <DatePicker id="idDiscontinuedDate" value="{input>/DiscontinuedDate}"/>
           </form:content>
         </form:SimpleForm>
   </content>
