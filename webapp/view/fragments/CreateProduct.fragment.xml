@@ -4,7 +4,7 @@ xmlns="sap.m"
 xmlns:l="sap.ui.layout"
 xmlns:form="sap.ui.layout.form"
 >
-<Dialog title="{i18n>createNewProduct}" contentWidth="800px" afterClose="onAfterClose">
+<Dialog id="test" title="{i18n>createNewProduct}" contentWidth="800px" afterClose="onAfterClose">
   <content>
         <form:SimpleForm
           layout="ResponsiveGridLayout"

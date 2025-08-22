@@ -13,7 +13,10 @@
            <List
             id="idProductList"
             class="sapUiSmallMarginTop listWithSmallerTitle"
-            items="{product>/items}"
+            items="{
+              path : 'product>/items',
+              groupHeaderFactory : '.formatter.formatGroupHeader'
+            }"
             noDataText="{i18n>noDataText}"
             mode="Delete"
             delete="onPressDelete">
@@ -21,9 +24,17 @@
               <Toolbar>
                 <Title text="{i18n>listHeader}" />
                 <ToolbarSpacer />
+                <Button icon="sap-icon://sort" press="onSortProduct" />
+                <Button icon="sap-icon://group" press="onGroupProduct" />
+                <Button icon="sap-icon://filter" press="onFilterProduct" />
                 <Button icon="sap-icon://add" press="onPressAddNewProduct" />
               </Toolbar>
             </headerToolbar>
+            <infoToolbar>
+                        <Toolbar id="idFilterInfoToolbar" visible="false">
+                            <Text id="idFilterText" />
+                        </Toolbar>
+                      </infoToolbar>
             <items>
               <ObjectListItem
                 title="{product>Name}"
@@ -39,9 +50,10 @@
                 <attributes>
                   <ObjectAttribute 
                         title= "Category" 
-                        text = "{=${product>Category} === '0' ? 'Food' : 
-                                ${product>Category} === '1' ? 'Beveages' :
-                                ${product>Category} === '2' ? 'Electronics' : 'None'}"/>
+                        text = "{
+                            path : 'product>Category',
+                            formatter : '.formatter.formatCategory'
+                        }"/>
 
                   
 
