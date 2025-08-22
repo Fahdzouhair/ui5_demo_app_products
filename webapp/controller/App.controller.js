@@ -1,15 +1,20 @@
 sap.ui.define(["sap/ui/core/mvc/Controller",
     "sap/ui/core/Fragment",
+    "ui5/demo/app/model/models",
     "ui5/demo/app/model/formatter"],
-    (Controller, Fragment, formatter) => {
+    (Controller, Fragment, models, formatter) => {
         'use strict'
 
 
-        
+
 
         return Controller.extend('ui5.demo.app.controller.App', {
-            formatter : formatter, 
+            formatter: formatter,
+
             onPressProduct: function () {
+
+                if ( !this._validateInputData() ) return 
+
                 const oInput = this.getView().getModel('input').getData();
                 const oProduct = this.getView().getModel('product');
 
@@ -32,7 +37,11 @@ sap.ui.define(["sap/ui/core/mvc/Controller",
 
                 oModel.refresh();
             },
-
+            
+            onAfterClose: function(){
+                this.getOwnerComponent().setModel(models.createProductModel() , "input");
+                this.getOwnerComponent().setMode(models.validatePeoductModel(), "validate")
+            },
 
             onPressAddNewProduct: function () {
                 if (!this._oCreateProductDialog) {
@@ -51,6 +60,23 @@ sap.ui.define(["sap/ui/core/mvc/Controller",
             },
             onPressCancelNewProduct: function () {
                 this._oCreateProductDialog.close()
+            },
+            _validateInputData: function () {
+                const oInput = this.getView().getModel("input").getData();
+                const oValidateModel = this.getView().getModel("validate");
+                const oValidateData = oValidateModel.getData();
+
+                oValidateModel.setProperty("/Name", !!oInput.Name);
+                oValidateModel.setProperty("/Category", !!oInput.Category);
+                oValidateModel.setProperty("/Price", !!oInput.Price);
+                oValidateModel.setProperty("/ReleaseDate", !!oInput.ReleaseDate);
+                oValidateModel.setProperty("/DiscontinuedDate", !!oInput.DiscontinuedDate);
+
+                return Object.keys(oValidateData).every((key) => {
+                    return oValidateData[key] === true
+                });
+
+
             }
         })
     })

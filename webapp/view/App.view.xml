@@ -27,7 +27,13 @@
             <items>
               <ObjectListItem
                 title="{product>Name}"
-                number="{product>Price}"
+                number="{
+                  parts: [{ path: 'product>Price' }, { path: 'product>currency' }],
+                              type: 'sap.ui.model.type.Currency',
+                              formatOptions: {
+                                 showMeasure: false
+                          }
+                }"
                 numberUnit="EUR"
                 numberState="{= ${product>Price} > 20 ? 'Warning' : 'None' }">
                 <attributes>

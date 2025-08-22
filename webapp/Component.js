@@ -13,6 +13,7 @@ sap.ui.define(['sap/ui/core/UIComponent',
                 //init parent 
                 UIComponent.prototype.init.apply(this, arguments)
                 this.setModel(models.createProductModel(),"input")
+                this.setModel(models.validatePeoductModel(),"validate")
             }
         })
 
