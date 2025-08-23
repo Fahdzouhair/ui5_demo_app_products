@@ -8,6 +8,15 @@
         "description": "{{appDescription}}",
         "applicationVersion": {
             "version": "1.0.0"
+        },
+        "dataSources": {
+            "mainService": {
+                "uri" : "/odata/V2/(S(asuy5uvt4zomac50mpbouubt))/OData/OData.svc/",
+                "type":"OData",
+                "settings": {
+                    "odataVersion": "2.0"
+                }
+            }
         }
     },
     "sap.ui": {
@@ -36,6 +45,12 @@
             "cozy": true
         },
         "models": {
+            "":{
+                "dataSource": "mainService",
+                "settings": {
+                    "useBatch" : false
+                }
+            },
             "i18n": {
                 "type": "sap.ui.model.resource.ResourceModel",
                 "settings": {

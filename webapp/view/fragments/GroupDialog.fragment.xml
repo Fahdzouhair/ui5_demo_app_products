@@ -2,7 +2,7 @@
     <ViewSettingsDialog confirm="onConfirmGroup">
         <groupItems>
             <ViewSettingsItem text="{i18n>productCategory}"
-                              key="Category"
+                              key="Category/ID"
             />
         </groupItems>
     </ViewSettingsDialog>

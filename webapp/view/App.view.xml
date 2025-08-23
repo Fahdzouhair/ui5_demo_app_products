@@ -14,15 +14,21 @@
             id="idProductList"
             class="sapUiSmallMarginTop listWithSmallerTitle"
             items="{
-              path : 'product>/items',
+              path : '/Products',
+              parameters:{
+                expand : 'Category'
+              },
               groupHeaderFactory : '.formatter.formatGroupHeader'
             }"
             noDataText="{i18n>noDataText}"
             mode="Delete"
-            delete="onPressDelete">
+            delete="onPressDelete"
+            updateFinished="onProductLoaded"
+            growing="true"
+            growingThreshold="5">
             <headerToolbar>
               <Toolbar>
-                <Title text="{i18n>listHeader}" />
+                <Title id="idListTitle" text="{i18n>listHeader}" />
                 <ToolbarSpacer />
                 <Button icon="sap-icon://sort" press="onSortProduct" />
                 <Button icon="sap-icon://group" press="onGroupProduct" />
@@ -37,42 +43,27 @@
                       </infoToolbar>
             <items>
               <ObjectListItem
-                title="{product>Name}"
-                number="{
-                  parts: [{ path: 'product>Price' }, { path: 'product>currency' }],
-                              type: 'sap.ui.model.type.Currency',
-                              formatOptions: {
-                                 showMeasure: false
-                          }
-                }"
+                title="{Name}"
+                number="{Price}"
                 numberUnit="EUR"
                 numberState="{= ${product>Price} > 20 ? 'Warning' : 'None' }">
                 <attributes>
                   <ObjectAttribute 
                         title= "Category" 
-                        text = "{
-                            path : 'product>Category',
-                            formatter : '.formatter.formatCategory'
-                        }"/>
+                        text = "{Category/Name}"/>
 
                   
 
-                  <ObjectAttribute title="Release date" text="{ 
-                      path: 'product>ReleaseDate',
-                      type: 'sap.ui.model.type.Date',
-                      formatOptions: {
-                      source: {pattern: 'yyyy-MM-ddTHH:mm:ss.SSSX'},
-                      style: 'short'
-                      }
-                                  }"/>
-                  <ObjectAttribute 
-                      visible="{= !!${product>Width} &amp;&amp; !!${product>Height} &amp;&amp; !!${product>Depth}}"
-                      text="{product>Width} x {product>Height} x {product>Depth} cm"/>
+                  <ObjectAttribute title="Release date" text="{
+                                                            path  : 'ReleaseDate',
+                                                            type  : 'sap.ui.model.type.Date'
+                  }"/>
+                 
                 
                 </attributes>
                 <firstStatus>
                   <ObjectStatus text="{ 
-                                        path: 'product>DiscontinuedDate',
+                                        path: 'DiscontinuedDate',
                                         formatter:'.formatter.formatAvailabilityText',
                                         type: 'sap.ui.model.type.Date',
                                         formatOptions: {

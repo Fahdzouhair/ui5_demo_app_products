@@ -2,28 +2,29 @@ sap.ui.define(["sap/ui/core/mvc/Controller",
     "sap/ui/core/Fragment",
     "sap/ui/model/Sorter",
     "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
     "ui5/demo/app/model/models",
     "ui5/demo/app/model/formatter"],
-    (Controller, Fragment, Sorter, Filter, models, formatter) => {
+    (Controller, Fragment, Sorter, Filter, FilterOperator, models, formatter) => {
         'use strict'
 
 
 
 
         return Controller.extend('ui5.demo.app.controller.App', {
-            
+
             formatter: formatter,
-            _oDialogP : {},
-            fragmentNames : {
-                createProduct : "ui5.demo.app.view.fragments.CreateProduct",
-                sortProduct   : "ui5.demo.app.view.fragments.SortDialog",
-                groupProduct  : "ui5.demo.app.view.fragments.GroupDialog",
-                filtreProduct : "ui5.demo.app.view.fragments.FilterDialog"
+            _oDialogP: {},
+            fragmentNames: {
+                createProduct: "ui5.demo.app.view.fragments.CreateProduct",
+                sortProduct: "ui5.demo.app.view.fragments.SortDialog",
+                groupProduct: "ui5.demo.app.view.fragments.GroupDialog",
+                filtreProduct: "ui5.demo.app.view.fragments.FilterDialog"
             },
-           
+
             onPressProduct: async function () {
 
-                if ( !this._validateInputData() ) return 
+                if (!this._validateInputData()) return
 
                 const oInput = this.getView().getModel('input').getData();
                 const oProduct = this.getView().getModel('product');
@@ -38,6 +39,12 @@ sap.ui.define(["sap/ui/core/mvc/Controller",
 
 
             },
+            onProductLoaded: function (oEvent) {
+                let sTitle = this.getOwnerComponent().getModel("i18n").getResourceBundle().getText("listHeader");
+                sTitle = `${sTitle} (${oEvent.getParameter("total")})`;
+
+                this.getView().byId("idListTitle").setText(sTitle);
+            },
             onPressDelete: function (oEvent) {
                 const oItem = oEvent.getParameter("listItem")
 
@@ -48,34 +55,34 @@ sap.ui.define(["sap/ui/core/mvc/Controller",
 
                 oModel.refresh();
             },
-            
-            onAfterClose: function(){
-                this.getOwnerComponent().setModel(models.createProductModel() , "input");
+
+            onAfterClose: function () {
+                this.getOwnerComponent().setModel(models.createProductModel(), "input");
                 this.getOwnerComponent().setModel(models.validatePeoductModel(), "validate")
             },
 
-            onPressAddNewProduct:async function () {
+            onPressAddNewProduct: async function () {
                 const oDialog = await this._openDialog(this.fragmentNames.createProduct)
                 oDialog.open()
             },
             onPressCancelNewProduct: async function () {
                 const oDialog = await this._openDialog(this.fragmentNames.createProduct)
                 oDialog.close();
-               
+
             },
-            onSortProduct: async function(){
+            onSortProduct: async function () {
                 const oDialog = await this._openDialog(this.fragmentNames.sortProduct);
                 oDialog.open()
             },
-            onGroupProduct : async function(){
+            onGroupProduct: async function () {
                 const oDialog = await this._openDialog(this.fragmentNames.groupProduct);
                 oDialog.open()
             },
-            onFilterProduct : async function(){
+            onFilterProduct: async function () {
                 const oDialog = await this._openDialog(this.fragmentNames.filtreProduct);
                 oDialog.open()
             },
-            onConfirmSort: function(oEvent){
+            onConfirmSort: function (oEvent) {
                 const oItems = oEvent.getParameter("sortItem");
                 const bDes = oEvent.getParameter("sortDescending");
 
@@ -83,43 +90,49 @@ sap.ui.define(["sap/ui/core/mvc/Controller",
                     .byId("idProductList")
                     .getBinding("items")
                     .sort(
-                        oItems ? [new Sorter(oItems.getKey() , bDes) ] : []
+                        oItems ? [new Sorter(oItems.getKey(), bDes)] : []
                     );
                 console.log(
                     this.getView()
-                    .byId("idProductList")
-                    .getBinding("items")
-                    
+                        .byId("idProductList")
+                        .getBinding("items")
+
                 )
             },
-            onConfirmGroup : function(oEvent){
+            onConfirmGroup: function (oEvent) {
                 const oGroupItems = oEvent.getParameter("groupItem");
                 const bDes = oEvent.getParameter("groupDescending");
                 this.getView()
                     .byId("idProductList")
                     .getBinding("items")
                     .sort(
-                        oGroupItems ? [new Sorter(oGroupItems.getKey() , bDes , true) ] : []
+                        oGroupItems ? [new Sorter(oGroupItems.getKey(), bDes, true)] : []
                     );
-                
+
             },
-            onConfirmFilter: function(oEvent){
-                const aFilterItems = oEvent.getParameter("filterItems");
+            onConfirmFilter: function (oEvent) {
+                const aFilterKeys = oEvent.getParameter("filterCompoundKeys")
                 const aFilterString = oEvent.getParameter("filterString");
-                console.log(aFilterString)
-                
+
+
                 const aFilter = [];
 
-                aFilterItems.forEach(item =>{
-                    const [sPath , oOerator , sValue1 , sValue2] = item.getKey().split('__');
-                    aFilter.push(new Filter(sPath , oOerator , sValue1 , sValue2))
+                Object.entries(aFilterKeys).forEach(([sPath, oValues]) => {
+                    Object.keys(oValues).forEach(sKey => {
+                        if (sKey.includes("__")) {
+                            aFilter.push(new Filter(...sKey.split("__")))
+                        } else {
+                            aFilter.push(new Filter(sPath, FilterOperator.EQ, sKey))
+                        }
+                    })
                 })
+
                 this.getView()
                     .byId("idProductList")
                     .getBinding("items")
                     .filter(aFilter)
 
-                this.getView().byId("idFilterInfoToolbar").setVisible(aFilter.length > 0 ? true : false )
+                this.getView().byId("idFilterInfoToolbar").setVisible(aFilter.length > 0 ? true : false)
                 this.getView().byId("idFilterText").setText(aFilterString)
 
             },
@@ -140,19 +153,19 @@ sap.ui.define(["sap/ui/core/mvc/Controller",
 
 
             },
-            _openDialog :async function(fragmentView,sDialogId){
+            _openDialog: async function (fragmentView, sDialogId) {
 
-                if(!!!this._oDialogP[fragmentView]){
+                if (!!!this._oDialogP[fragmentView]) {
                     this._oDialogP[fragmentView] = Fragment.load({
-                        id : this.getView().createId(sDialogId),
-                        name : fragmentView,
+                        id: this.getView().createId(sDialogId),
+                        name: fragmentView,
                         controller: this
                     }).then(oDlg => {
                         this.getView().addDependent(oDlg);
                         return oDlg;
                     })
                 }
-                
+
                 return await this._oDialogP[fragmentView];
 
             }
