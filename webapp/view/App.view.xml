@@ -45,8 +45,10 @@
               <ObjectListItem
                 title="{Name}"
                 number="{Price}"
+                type="Active"
+                press="onPressItem"
                 numberUnit="EUR"
-                numberState="{= ${product>Price} > 20 ? 'Warning' : 'None' }">
+                numberState="{=${Price} > 20 ? 'Warning' : 'None' }">
                 <attributes>
                   <ObjectAttribute 
                         title= "Category" 
@@ -63,7 +65,7 @@
                 </attributes>
                 <firstStatus>
                   <ObjectStatus text="{ 
-                                        path: 'DiscontinuedDate',
+                                        path: 'ReleaseDate',
                                         formatter:'.formatter.formatAvailabilityText',
                                         type: 'sap.ui.model.type.Date',
                                         formatOptions: {
@@ -73,7 +75,7 @@
                                         style: 'short'
                                       }}"
                       state="{ 
-                          path : 'product>DiscontinuedDate',
+                          path : 'DiscontinuedDate',
                           formatter: '.formatter.formatAvailabilityState'
                            }"
                    />
