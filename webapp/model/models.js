@@ -8,7 +8,8 @@ sap.ui.define(["sap/ui/model/json/JSONModel",
                 Price: 0,
                 Currency : "EUR",
                 ReleaseDate: null,
-                DiscontinuedDate: null
+                DiscontinuedDate: null,
+                Rating:0
             })
         }, 
         validatePeoductModel(){
@@ -17,7 +18,8 @@ sap.ui.define(["sap/ui/model/json/JSONModel",
                 Category: true,
                 Price: true,
                 ReleaseDate: true,
-                DiscontinuedDate: true
+                DiscontinuedDate: true,
+                Rating:true
             })
         }
     }

@@ -1,15 +1,13 @@
 sap.ui.define(["sap/ui/core/mvc/Controller",
     "sap/ui/core/Fragment",
+    "sap/m/MessageBox",
     "sap/ui/model/Sorter",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "ui5/demo/app/model/models",
     "ui5/demo/app/model/formatter"],
-    (Controller, Fragment, Sorter, Filter, FilterOperator, models, formatter) => {
+    (Controller, Fragment, MessageBox, Sorter, Filter, FilterOperator, models, formatter) => {
         'use strict'
-
-
-
 
         return Controller.extend('ui5.demo.app.controller.App', {
 
@@ -19,25 +17,90 @@ sap.ui.define(["sap/ui/core/mvc/Controller",
                 createProduct: "ui5.demo.app.view.fragments.CreateProduct",
                 sortProduct: "ui5.demo.app.view.fragments.SortDialog",
                 groupProduct: "ui5.demo.app.view.fragments.GroupDialog",
-                filtreProduct: "ui5.demo.app.view.fragments.FilterDialog"
+                filtreProduct: "ui5.demo.app.view.fragments.FilterDialog",
+                editProduct: "ui5.demo.app.view.fragments.EditProduct"
             },
 
             onPressProduct: async function () {
 
+                const oPlayload = this.getView().getModel('input').getData();
                 if (!this._validateInputData()) return
+                oPlayload.ID = Date.now().toString().slice(-4)
 
-                const oInput = this.getView().getModel('input').getData();
-                const oProduct = this.getView().getModel('product');
+                delete oPlayload.Currency
+                delete oPlayload.Category
 
-                const oItems = oProduct.getProperty('/items');
+                this.getView().getModel().create('/Products', oPlayload, {
+                    success: (oData, oResponse) => {
+                        console.log(oData, oResponse)
+                    },
+                    Error: err => {
+                        console.log(err)
+                    }
+                })
 
-                oItems.push(oInput);
-                oProduct.refresh()
+
 
                 const oDialog = await this._openDialog(this.fragmentNames.createProduct);
                 oDialog.close();
 
 
+            },
+            onPressEditProduct: async function () {
+                const oView = this.getView()
+                const oModel = this.getView().getModel()
+                const sPath = this._oEditDialog.getBindingContext().getPath()
+                console.log(sPath)
+                
+                const oPayload = {
+                    Name: oView.byId("idProductNameEdit").getValue(),
+                    Price: oView.byId("idPriceEdit").getValue(),
+                    ReleaseDate: oView.byId("idReleaseDateEdit").getDateValue(),
+                    DiscontinuedDate: oView.byId("idDiscontinuedDateEdit").getDateValue(),
+                    Rating: oView.byId("idRatingEdit").getValue(),
+                }
+               
+                oModel.update(sPath , oPayload , {
+                    success: () => {
+                        MessageBox.show("Product Updated !")
+                        oModel.refresh();
+                        this._oEditDialog.close()
+                    },
+                    error  : err => {
+                        console.log(err);
+                        this._oEditDialog.close()
+                        
+                    } 
+                    
+                })
+
+                this._oEditDialog.close();
+
+            },
+            onPressItem: async function (oEvent) {
+
+                /*                MessageBox.show(oEvent.getSource().getBindingContext().getProperty("Description"), {
+                                    title: "Description"
+                                })
+                */
+
+                const sPath = oEvent.getSource().getBindingContext().getPath()
+
+                /*                
+                                this.getView().getModel().read(sPath,{
+                                    success: (oData) =>{
+                                        MessageBox.show(oData.Description , { title : "Description" })
+                                    },
+                                    Error: err => console.log(err)
+                                })
+                */
+                //console.log(this.getView().getModel().getProperty(`${sPath}/Name`))
+                const oDialog = await this._openDialog(this.fragmentNames.editProduct)
+                oDialog.bindElement({
+                    path: sPath
+                })
+                oDialog.open();
+                this._oEditDialog = oDialog
             },
             onProductLoaded: function (oEvent) {
                 let sTitle = this.getOwnerComponent().getModel("i18n").getResourceBundle().getText("listHeader");
@@ -47,11 +110,15 @@ sap.ui.define(["sap/ui/core/mvc/Controller",
             },
             onPressDelete: function (oEvent) {
                 const oItem = oEvent.getParameter("listItem")
-
-                const oModel = this.getView().getModel("product")
-                const oIndex = oItem.getBindingContext("product").getPath().split("/").pop();
-
-                oModel.getData().items.splice(oIndex, 1);
+                const oModel = this.getView().getModel()
+                const sPath  = oItem.getBindingContext().getPath()
+                
+                oModel.remove(sPath , {
+                    success: () => { 
+                        MessageBox.information(`Product ${sPath.slice(10 , sPath.length -1 )} Deleted`)
+                     },
+                     error: () => MessageBox.error("Product Does not deleted !")
+                })
 
                 oModel.refresh();
             },
@@ -66,7 +133,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller",
                 oDialog.open()
             },
             onPressCancelNewProduct: async function () {
-                const oDialog = await this._openDialog(this.fragmentNames.createProduct)
+                const oDialog = await this._openDialog(this.fragmentNames.editProduct)
                 oDialog.close();
 
             },
@@ -92,12 +159,6 @@ sap.ui.define(["sap/ui/core/mvc/Controller",
                     .sort(
                         oItems ? [new Sorter(oItems.getKey(), bDes)] : []
                     );
-                console.log(
-                    this.getView()
-                        .byId("idProductList")
-                        .getBinding("items")
-
-                )
             },
             onConfirmGroup: function (oEvent) {
                 const oGroupItems = oEvent.getParameter("groupItem");
@@ -157,16 +218,19 @@ sap.ui.define(["sap/ui/core/mvc/Controller",
 
                 if (!!!this._oDialogP[fragmentView]) {
                     this._oDialogP[fragmentView] = Fragment.load({
-                        id: this.getView().createId(sDialogId),
+                        id: this.getView().getId(),
                         name: fragmentView,
                         controller: this
                     }).then(oDlg => {
                         this.getView().addDependent(oDlg);
                         return oDlg;
                     })
-                }
 
-                return await this._oDialogP[fragmentView];
+                    return await this._oDialogP[fragmentView];
+
+                } else {
+                    return this._oDialogP[fragmentView];
+                }
 
             }
         })

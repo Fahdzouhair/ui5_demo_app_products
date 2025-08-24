@@ -4,7 +4,7 @@ xmlns="sap.m"
 xmlns:l="sap.ui.layout"
 xmlns:form="sap.ui.layout.form"
 >
-<Dialog id="test" title="{i18n>createNewProduct}" contentWidth="800px" afterClose="onAfterClose">
+<Dialog id="editFragment" title="{i18n>editNewProduct}" contentWidth="800px" afterClose="onAfterCloseEdit">
   <content>
         <form:SimpleForm
           layout="ResponsiveGridLayout"
@@ -25,30 +25,29 @@ xmlns:form="sap.ui.layout.form"
             <core:Title text="{i18n>productDetails}" />
 
             <Label text="{i18n>productName}" />
-            <Input id="idProductName" 
+            <Input id="idProductNameEdit" 
                    maxLength="40" 
-                   value="{input>/Name}" 
-                   valueState="{=${validate>/Name} ? 'None' : 'Error' }" />
+                   value="{Name}" 
+                   />
 
             <Label text="{i18n>category}" />
-            <ComboBox id="idCategory" 
-                      selectedKey="{input>/Category}"
-                      valueState="{=${validate>/Category} ? 'None' : 'Error' }">
+            <ComboBox id="idCategoryEdit" 
+                      items="/Categories"
+                      selectedKey="{Category/ID}"
+                      enabled="false"
+                      >
 
               <items>
-                <core:Item key="" text="" />
-                <core:Item key="0" text="Food" />
-                <core:Item key="1" text="Beverages" />
-                <core:Item key="2" text="Electronics" />
+                <core:Item key="{ID}" text="{Name}" />
               </items>
 
             </ComboBox>
             
             <Label text="{i18n>price}" />
-            <Input id="idPrice" 
+            <Input id="idPriceEdit" 
                    type="Number" 
-                   value="{input>/Price}"
-                   valueState="{=${validate>/Price} ? 'None' : 'Error' }" />
+                   value="{Price}"
+                />
             
             <Input value="EUR" editable="false">
             
@@ -60,22 +59,22 @@ xmlns:form="sap.ui.layout.form"
             <core:Title text="{i18n>dates}" />
             
             <Label text="{i18n>releaseDate}" />
-            <DatePicker id="idReleaseDate"  
-                        dateValue="{input>/ReleaseDate}"
-                        valueState="{=${validate>/ReleaseDate} ? 'None' : 'Error' }"/>
+            <DatePicker id="idReleaseDateEdit"  
+                        dateValue="{ReleaseDate}"
+                        />
           
             <Label text="{i18n>discontinuedDate}" />
-            <DatePicker id="idDiscontinuedDate" 
-                        dateValue="{input>/DiscontinuedDate}"
-                        valueState="{=${validate>/DiscontinuedDate} ? 'None' : 'Error' }"/>
+            <DatePicker id="idDiscontinuedDateEdit" 
+                        dateValue="{DiscontinuedDate}"
+                        />
 
             <Label text="{i18n>rating}"/>
-            <RatingIndicator value="{input>/Rating}"/>
+            <RatingIndicator id="idRatingEdit" value="{Rating}"/>
           </form:content>
         </form:SimpleForm>
   </content>
     <beginButton>
-      <Button type="Emphasized" text="{i18n>create}" press="onPressProduct" />
+      <Button type="Emphasized" text="{i18n>edit}" press="onPressEditProduct" />
     </beginButton>
     <endButton>
         <Button text="{i18n>cancel}" press="onPressCancelNewProduct" />
