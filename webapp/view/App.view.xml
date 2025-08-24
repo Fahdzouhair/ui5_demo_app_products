@@ -13,16 +13,73 @@
            <List
             id="idProductList"
             class="sapUiSmallMarginTop listWithSmallerTitle"
+            items="{
+              path : '/Products',
+              parameters:{
+                expand : 'Category'
+              },
+              groupHeaderFactory : '.formatter.formatGroupHeader'
+            }"
             noDataText="{i18n>noDataText}"
             mode="Delete"
-            delete="onPressDelete">
+            delete="onPressDelete"
+            updateFinished="onProductLoaded"
+            growing="true"
+            growingThreshold="5">
             <headerToolbar>
               <Toolbar>
-                <Title text="{i18n>listHeader}" />
+                <Title id="idListTitle" text="{i18n>listHeader}" />
                 <ToolbarSpacer />
+                <Button icon="sap-icon://sort" press="onSortProduct" />
+                <Button icon="sap-icon://group" press="onGroupProduct" />
+                <Button icon="sap-icon://filter" press="onFilterProduct" />
                 <Button icon="sap-icon://add" press="onPressAddNewProduct" />
               </Toolbar>
             </headerToolbar>
+            <infoToolbar>
+                        <Toolbar id="idFilterInfoToolbar" visible="false">
+                            <Text id="idFilterText" />
+                        </Toolbar>
+                      </infoToolbar>
+            <items>
+              <ObjectListItem
+                title="{Name}"
+                number="{Price}"
+                numberUnit="EUR"
+                numberState="{= ${product>Price} > 20 ? 'Warning' : 'None' }">
+                <attributes>
+                  <ObjectAttribute 
+                        title= "Category" 
+                        text = "{Category/Name}"/>
+
+                  
+
+                  <ObjectAttribute title="Release date" text="{
+                                                            path  : 'ReleaseDate',
+                                                            type  : 'sap.ui.model.type.Date'
+                  }"/>
+                 
+                
+                </attributes>
+                <firstStatus>
+                  <ObjectStatus text="{ 
+                                        path: 'DiscontinuedDate',
+                                        formatter:'.formatter.formatAvailabilityText',
+                                        type: 'sap.ui.model.type.Date',
+                                        formatOptions: {
+                                              source: {
+                                              pattern: 'yyyy-MM-ddTHH:mm:ss.SSSX'
+                                          },
+                                        style: 'short'
+                                      }}"
+                      state="{ 
+                          path : 'product>DiscontinuedDate',
+                          formatter: '.formatter.formatAvailabilityState'
+                           }"
+                   />
+                </firstStatus>
+              </ObjectListItem>
+            </items>
           </List>
 
       </Page>

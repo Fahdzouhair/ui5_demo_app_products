@@ -4,7 +4,7 @@ xmlns="sap.m"
 xmlns:l="sap.ui.layout"
 xmlns:form="sap.ui.layout.form"
 >
-<Dialog title="{i18n>createNewProduct}" contentWidth="800px">
+<Dialog id="test" title="{i18n>createNewProduct}" contentWidth="800px" afterClose="onAfterClose">
   <content>
         <form:SimpleForm
           layout="ResponsiveGridLayout"
@@ -23,29 +23,52 @@ xmlns:form="sap.ui.layout.form"
           columnsXL="2">
           <form:content>
             <core:Title text="{i18n>productDetails}" />
+
             <Label text="{i18n>productName}" />
-            <Input id="idProductName" maxLength="40" />
+            <Input id="idProductName" 
+                   maxLength="40" 
+                   value="{input>/Name}" 
+                   valueState="{=${validate>/Name} ? 'None' : 'Error' }" />
+
             <Label text="{i18n>category}" />
-            <ComboBox id="idCategory">
+            <ComboBox id="idCategory" 
+                      selectedKey="{input>/Category}"
+                      valueState="{=${validate>/Category} ? 'None' : 'Error' }">
+
               <items>
                 <core:Item key="" text="" />
                 <core:Item key="0" text="Food" />
                 <core:Item key="1" text="Beverages" />
                 <core:Item key="2" text="Electronics" />
               </items>
+
             </ComboBox>
+            
             <Label text="{i18n>price}" />
-            <Input id="idPrice" type="Number" />
+            <Input id="idPrice" 
+                   type="Number" 
+                   value="{input>/Price}"
+                   valueState="{=${validate>/Price} ? 'None' : 'Error' }" />
+            
             <Input value="EUR" editable="false">
+            
               <layoutData>
                 <l:GridData span="XL1 L2 M3 S12" />
               </layoutData>
             </Input>
+          
             <core:Title text="{i18n>dates}" />
+            
             <Label text="{i18n>releaseDate}" />
-            <DatePicker id="idReleaseDate" placeholder="{i18n>releaseDate}" />
+            <DatePicker id="idReleaseDate"  
+                        value="{input>/ReleaseDate}"
+                        valueState="{=${validate>/ReleaseDate} ? 'None' : 'Error' }"/>
+          
             <Label text="{i18n>discontinuedDate}" />
-            <DatePicker id="idDiscontinuedDate" placeholder="{i18n>discontinuedDate}" />
+            <DatePicker id="idDiscontinuedDate" 
+                        value="{input>/DiscontinuedDate}"
+                        valueState="{=${validate>/DiscontinuedDate} ? 'None' : 'Error' }"/>
+          
           </form:content>
         </form:SimpleForm>
   </content>

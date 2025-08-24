@@ -1,66 +1,173 @@
 sap.ui.define(["sap/ui/core/mvc/Controller",
-    "sap/m/ObjectListItem",
-    "sap/m/ObjectAttribute",
-    "sap/m/ObjectStatus",
-    "sap/ui/core/library",
-    "sap/ui/core/Fragment"],
-    (Controller, ObjectListItem, ObjectAttribute, ObjectStatus, coreLibrary,Fragment) => {
+    "sap/ui/core/Fragment",
+    "sap/ui/model/Sorter",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+    "ui5/demo/app/model/models",
+    "ui5/demo/app/model/formatter"],
+    (Controller, Fragment, Sorter, Filter, FilterOperator, models, formatter) => {
         'use strict'
-        
-        const { ValueState } = coreLibrary;
+
+
+
 
         return Controller.extend('ui5.demo.app.controller.App', {
-            onPressProduct: function () {
-                const oBundel = this.getOwnerComponent().getModel("i18n").getResourceBundle();
-                const sProductName = this.getView().byId("productNameID").getValue();
-                const sCategory = this.getView().byId("idCategory").getSelectedItem().getText();
-                const sProductPrice = this.getView().byId("priceProductID").getValue();
-                const sReleaseDate = this.getView().byId("releaseDateID").getValue();
-                const sDiscountinuedDate = this.getView().byId("discountingDateID").getValue();
 
-                const newObject = new ObjectListItem({
-                    title: sProductName,
-                    number: sProductPrice,
-                    numberUnit: "EUR",
-                    attributes: [
-                        new ObjectAttribute({ title: "Category", text: sCategory }),
-                        new ObjectAttribute({ title: oBundel.getText('category'), text: sReleaseDate })]
-                    ,
-                    firstStatus: new ObjectStatus({
-                        text: this._getAvailabilityText(sReleaseDate),
-                        state: this._getAvailabilityStatus(sReleaseDate)
+            formatter: formatter,
+            _oDialogP: {},
+            fragmentNames: {
+                createProduct: "ui5.demo.app.view.fragments.CreateProduct",
+                sortProduct: "ui5.demo.app.view.fragments.SortDialog",
+                groupProduct: "ui5.demo.app.view.fragments.GroupDialog",
+                filtreProduct: "ui5.demo.app.view.fragments.FilterDialog"
+            },
+
+            onPressProduct: async function () {
+
+                if (!this._validateInputData()) return
+
+                const oInput = this.getView().getModel('input').getData();
+                const oProduct = this.getView().getModel('product');
+
+                const oItems = oProduct.getProperty('/items');
+
+                oItems.push(oInput);
+                oProduct.refresh()
+
+                const oDialog = await this._openDialog(this.fragmentNames.createProduct);
+                oDialog.close();
+
+
+            },
+            onProductLoaded: function (oEvent) {
+                let sTitle = this.getOwnerComponent().getModel("i18n").getResourceBundle().getText("listHeader");
+                sTitle = `${sTitle} (${oEvent.getParameter("total")})`;
+
+                this.getView().byId("idListTitle").setText(sTitle);
+            },
+            onPressDelete: function (oEvent) {
+                const oItem = oEvent.getParameter("listItem")
+
+                const oModel = this.getView().getModel("product")
+                const oIndex = oItem.getBindingContext("product").getPath().split("/").pop();
+
+                oModel.getData().items.splice(oIndex, 1);
+
+                oModel.refresh();
+            },
+
+            onAfterClose: function () {
+                this.getOwnerComponent().setModel(models.createProductModel(), "input");
+                this.getOwnerComponent().setModel(models.validatePeoductModel(), "validate")
+            },
+
+            onPressAddNewProduct: async function () {
+                const oDialog = await this._openDialog(this.fragmentNames.createProduct)
+                oDialog.open()
+            },
+            onPressCancelNewProduct: async function () {
+                const oDialog = await this._openDialog(this.fragmentNames.createProduct)
+                oDialog.close();
+
+            },
+            onSortProduct: async function () {
+                const oDialog = await this._openDialog(this.fragmentNames.sortProduct);
+                oDialog.open()
+            },
+            onGroupProduct: async function () {
+                const oDialog = await this._openDialog(this.fragmentNames.groupProduct);
+                oDialog.open()
+            },
+            onFilterProduct: async function () {
+                const oDialog = await this._openDialog(this.fragmentNames.filtreProduct);
+                oDialog.open()
+            },
+            onConfirmSort: function (oEvent) {
+                const oItems = oEvent.getParameter("sortItem");
+                const bDes = oEvent.getParameter("sortDescending");
+
+                this.getView()
+                    .byId("idProductList")
+                    .getBinding("items")
+                    .sort(
+                        oItems ? [new Sorter(oItems.getKey(), bDes)] : []
+                    );
+                console.log(
+                    this.getView()
+                        .byId("idProductList")
+                        .getBinding("items")
+
+                )
+            },
+            onConfirmGroup: function (oEvent) {
+                const oGroupItems = oEvent.getParameter("groupItem");
+                const bDes = oEvent.getParameter("groupDescending");
+                this.getView()
+                    .byId("idProductList")
+                    .getBinding("items")
+                    .sort(
+                        oGroupItems ? [new Sorter(oGroupItems.getKey(), bDes, true)] : []
+                    );
+
+            },
+            onConfirmFilter: function (oEvent) {
+                const aFilterKeys = oEvent.getParameter("filterCompoundKeys")
+                const aFilterString = oEvent.getParameter("filterString");
+
+
+                const aFilter = [];
+
+                Object.entries(aFilterKeys).forEach(([sPath, oValues]) => {
+                    Object.keys(oValues).forEach(sKey => {
+                        if (sKey.includes("__")) {
+                            aFilter.push(new Filter(...sKey.split("__")))
+                        } else {
+                            aFilter.push(new Filter(sPath, FilterOperator.EQ, sKey))
+                        }
                     })
                 })
 
-                this.getView().byId("listID").addItem(newObject);
+                this.getView()
+                    .byId("idProductList")
+                    .getBinding("items")
+                    .filter(aFilter)
+
+                this.getView().byId("idFilterInfoToolbar").setVisible(aFilter.length > 0 ? true : false)
+                this.getView().byId("idFilterText").setText(aFilterString)
+
             },
-            onDeleteListItem: function (oEvent) {
-                const sList = oEvent.getSource();
-                sList.removeItem(oEvent.getParameter("listItem"));
+            _validateInputData: function () {
+                const oInput = this.getView().getModel("input").getData();
+                const oValidateModel = this.getView().getModel("validate");
+                const oValidateData = oValidateModel.getData();
+
+                oValidateModel.setProperty("/Name", !!oInput.Name);
+                oValidateModel.setProperty("/Category", !!oInput.Category);
+                oValidateModel.setProperty("/Price", !!oInput.Price);
+                oValidateModel.setProperty("/ReleaseDate", !!oInput.ReleaseDate);
+                oValidateModel.setProperty("/DiscontinuedDate", !!oInput.DiscontinuedDate);
+
+                return Object.keys(oValidateData).every((key) => {
+                    return oValidateData[key] === true
+                });
+
+
             },
-            _getAvailabilityText(oDate) {
-                return oDate > new Date().toLocaleDateString() ? "Available" : "Unavailable";
-            },
-            _getAvailabilityStatus(oDate) {
-                return oDate > new Date() ? ValueState.Success : ValueState.Error;
-            },
-            onPressAddNewProduct: function(){
-                if(!this._oCreateProductDialog){
-                    Fragment.load({
-                        id:this.getView().getId(),
-                        name:"ui5.demo.app.view.fragments.CreateProduct",
+            _openDialog: async function (fragmentView, sDialogId) {
+
+                if (!!!this._oDialogP[fragmentView]) {
+                    this._oDialogP[fragmentView] = Fragment.load({
+                        id: this.getView().createId(sDialogId),
+                        name: fragmentView,
                         controller: this
-                    }).then(oDialog=>{
-                        this._oCreateProductDialog = oDialog
-                        this.getView().addDependent(oDialog)
-                        oDialog.open()
+                    }).then(oDlg => {
+                        this.getView().addDependent(oDlg);
+                        return oDlg;
                     })
-                }else{
-                    this._oCreateProductDialog.open()
                 }
-            },
-            onPressCancelNewProduct: function(){
-                this._oCreateProductDialog.close()
+
+                return await this._oDialogP[fragmentView];
+
             }
         })
     })

@@ -12,7 +12,7 @@ framework:
       optional: true
 builder:
   customTasks:
-    - name : ui5-tooling-transpile-task
+    - name: ui5-tooling-transpile-task
       afterTask: replaceVersion
       configuration:
         babelConfig:
@@ -28,4 +28,11 @@ server:
         debug: true
         extraExts: "XML,json,properties"
         path: webapp
-    
+        port: 35729
+        usePolling: true
+
+    - name: ui5-middleware-simpleproxy
+      afterMiddleware: compression
+      mountPath: /odata
+      configuration:
+        baseUri: "https://services.odata.org/"
