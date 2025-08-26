@@ -74,7 +74,7 @@ xmlns:form="sap.ui.layout.form"
         </form:SimpleForm>
   </content>
     <beginButton>
-      <Button type="Emphasized" text="{i18n>edit}" press="onPressEditProduct" />
+      <Button type="Emphasized" text="{i18n>edit}" press="onPressEditProduct2" />
     </beginButton>
     <endButton>
         <Button text="{i18n>cancel}" press="onPressCancelNewProduct" />
