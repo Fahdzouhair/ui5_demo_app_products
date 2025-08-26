@@ -48,7 +48,8 @@
                 "dataSource": "mainService",
                 "settings": {
                     "useBatch": false,
-                    "defaultCountMode": "Request"
+                    "defaultCountMode": "Request",
+                    "defaultBindingMode": "TwoWay"
                 }
             },
             "i18n": {
@@ -58,12 +59,52 @@
                 }
             }
         },
-        "resources": {
-            "css": [
+        "routing": {
+            "config": {
+                "routerClass": "sap.m.routing.Router",
+                "type": "View",
+                "viewType": "XML",
+                "path": "ui5.demo.app.view",
+                "controlId": "app",
+                "controlAggregation": "pages",
+                "transition": "slide",
+                "async": true
+            },
+            "routes": [
                 {
-                    "uri": "css/style.css"
+                    "pattern": "",
+                    "name": "home",
+                    "target": "targetHome"
+                },
+                {
+                    "pattern": "detail/{productID}:?query:",
+                    "name": "detail",
+                    "target": "targeDetail"
+                },
+                {
+                    "pattern": "edit",
+                    "name": "edit",
+                    "target": "targetEdit"
                 }
-            ]
+            ],
+            "targets": {
+                "targetHome": {
+                    "viewId": "idTargetHome",
+                    "name": "Home",
+                    "viewLevel": 1
+                },
+                "targeDetail": {
+                    "viewId": "idTargetDetail",
+                    "name": "Detail",
+                    "viewLevel": 2
+                },
+                "targetEdit": {
+                    "viewId": "idTargetEdit",
+                    "name": "Edit",
+                    "transition":"show",
+                    "viewLevel": 3
+                }
+            }
         }
     }
 }

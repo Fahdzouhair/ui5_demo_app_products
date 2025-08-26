@@ -12,6 +12,8 @@ sap.ui.define(['sap/ui/core/UIComponent',
             init: function () {
                 //init parent 
                 UIComponent.prototype.init.apply(this, arguments)
+
+                this.getRouter().initialize()
                 this.setModel(models.createProductModel(),"input")
                 this.setModel(models.validatePeoductModel(),"validate")
             }
